@@ -1,0 +1,10 @@
+# global ignores for build and eclipse files
+bin
+build
+obj
+desktop.ini
+.project
+.classpath
+.settings
+.vscode
+.gradle

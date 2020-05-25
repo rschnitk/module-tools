@@ -1,0 +1,72 @@
+// ./gradlew wrapper --gradle-version=5.4.1 
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+group = 'com.ceyoniq.nscale.tooling'
+version = "1.0"
+
+sourceSets {
+   java9 {
+      java {
+       srcDirs = ['src/main/java9']
+      }
+   }
+}
+
+dependencies {
+    java9Implementation files(sourceSets.main.output.classesDirs) { builtBy compileJava }
+}
+
+compileJava {
+   sourceCompatibility = JavaVersion.VERSION_1_8
+   targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+compileJava9Java {
+   sourceCompatibility = JavaVersion.VERSION_1_9
+   targetCompatibility = JavaVersion.VERSION_1_9
+}
+
+// this will configure the java compile tasks with the appropriate JDK
+project.afterEvaluate {
+    tasks.withType(JavaCompile) {
+    	def env = ( sourceCompatibility == JavaVersion.VERSION_1_8 ) ? "JAVA8_HOME" : "JAVA11_HOME";
+        def jdkHome = System.getenv( env )
+        options.fork = true
+        options.forkOptions.javaHome = file(jdkHome)
+    }
+}
+
+jar {
+	// archiveBaseName = "module-options"
+    into('') {
+        from sourceSets.java9.output
+    }
+}
+
+ext.useArtifactory = true;
+
+publishing { // new maven
+    repositories {
+        if ( useArtifactory ) {
+	        maven {
+	            allowInsecureProtocol = true
+	            url  "http://artifactory1/artifactory/libs-release-local/"
+		        credentials {
+		            username = 'deployer'
+		            password = 'deployer'
+		        }
+	        }
+        } else {        
+	        maven {
+	            url "file:///${rootProject.projectDir}/upload"
+	        }
+        }
+    }
+    publications {
+        mavenJava( MavenPublication ) {
+            from components.java
+        }
+    }
+}
