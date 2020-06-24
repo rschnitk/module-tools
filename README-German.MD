@@ -1,7 +1,7 @@
 module-tools
 ============
 
-who uses Java version >= 9 knows the unsightly messages:
+wer Java Version >= 9 benutzt, kennt die unschönen Meldungen:
 
 > WARNING: An illegal reflective access operation has occurred    
 > WARNING: Illegal reflective access by com.caucho.hessian.io.JavaDeserializer (al-cmdclient-7.15.1100.jar) to field java.lang.StackTraceElement.classLoaderName    
@@ -9,15 +9,15 @@ who uses Java version >= 9 knows the unsightly messages:
 > WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations    
 > WARNING: All illegal access operations will be denied in a future release    
 
-This can be avoided with a Java/JVM option:
+Das kann mit einer Java/JVM Option umgangen werden:
 ```bash
     java  --add-opens=java.base/java.lang=ALL-UNNAMED -jar  Application.jar
 ```
 
-With small tools, however, this is stupid, since the user always has to give it.
-If you have used Java 8, the JVM does not start with this option.
+Bei kleinen Tools ist das aber doof, da der Benutzer das immer mitgeben muss.
+Falls man Java 8 erwischt hat, startet die JVM nicht mit dieser Option.
 
-However, this can also be solved programmatically, for this there is the small library "module-tools" or the class ModuleOptions. Here you only have to hand over the module and the package. If Java 8 is active, a dummy class is referenced, there is no error.
+Allerdings kann man das auch programmatisch lösen, dafür gibt es die kleine Library „module-tools“ bzw. die Klasse ModuleOptions. Hier muss man nur das Modul und das Package übergeben. Falls Java 8 aktiv ist, wird eine Dummy Klasse referenziert, es gibt keinen Fehler.
 
 ```java
 public static void main ( String[] args ) throws Exception {
