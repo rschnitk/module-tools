@@ -12,7 +12,7 @@ public interface ModuleOptions {
     
     /**
      * Create Module Options or dummy Implementation on Java8
-     * @return
+     * @return the ModuleOptions implementation
      */
     static ModuleOptions create() {
         String className = ModuleOptions.class.getName() + "Impl";
