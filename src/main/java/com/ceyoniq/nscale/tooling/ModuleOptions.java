@@ -11,7 +11,13 @@ public interface ModuleOptions {
     public void addOpens( String module, String pn );
     
     /**
-     * Create Module Options or dummy Implementation on Java8
+     * Create ModuleOptions for Java >= 9 or dummy implementation on Java 8. 
+     * <p>
+     * Java 9-15 implementation will use Unsafe to allow deep reflection. </br>
+     * Java 16 JEP 396: <i>  Strongly Encapsulate JDK Internals by Default</i> does not allow reflection access on fields. </br>
+     * Therefore you must open "java.lang" for this module or all unnamed: </br>
+     * <code> java --add-opens java.base/java.lang=ALL-UNNAMED <code> .
+     * </p>
      * @return the ModuleOptions implementation
      */
     static ModuleOptions create() {
