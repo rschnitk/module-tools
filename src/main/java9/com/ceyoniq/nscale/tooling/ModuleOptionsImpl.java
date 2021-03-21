@@ -9,22 +9,29 @@ import sun.misc.Unsafe;
 
 public class ModuleOptionsImpl implements ModuleOptions {
 
-    private Unsafe unsafe;
     private Method methodAddOpens;
 
     public ModuleOptionsImpl() {
         try {
-            // get unsafe
-            Field f = Unsafe.class.getDeclaredField( "theUnsafe" );
-            f.setAccessible( true );
-            unsafe = ( Unsafe ) f.get( null );
-            
-            // like command line: java --add-opens
+            // this method is called by command line: java --add-opens
             methodAddOpens = Module.class.getDeclaredMethod( "implAddOpensToAllUnnamed", String.class );
             
-            // set accessible = true
-            Field override = AccessibleObject.class.getDeclaredField( "override" );
-            unsafe.putBoolean( methodAddOpens, unsafe.objectFieldOffset( override ), true );
+            try {
+                // For Java 9-15, try to use Unsafe to setAccessible() - no warnings on command line
+                Field override = AccessibleObject.class.getDeclaredField( "override" );
+
+                // Use unsafe
+                Field f = Unsafe.class.getDeclaredField( "theUnsafe" );
+                f.setAccessible( true );
+                Unsafe unsafe = ( Unsafe ) f.get( null );
+                
+                // set accessible = true
+                unsafe.putBoolean( methodAddOpens, unsafe.objectFieldOffset( override ), true );
+                
+            } catch ( NoSuchFieldException ex ) {
+                // Java 16: minimum JVM option is:   "--add-opens" "java.base/java.lang=ALL-UNNAMED"
+                methodAddOpens.setAccessible( true );
+            }
             
         } catch ( ReflectiveOperationException | SecurityException ex ) {
         }
