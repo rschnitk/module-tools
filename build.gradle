@@ -54,6 +54,11 @@ sourcesJar {
 	from sourceSets.java9.java
 }
 
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addBooleanOption('html5', true);
+}
+
 ext.useArtifactory = true;
 
 publishing { // new maven
