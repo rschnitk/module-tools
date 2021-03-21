@@ -50,6 +50,10 @@ jar {
     }
 }
 
+sourcesJar {
+	from sourceSets.java9.java
+}
+
 ext.useArtifactory = true;
 
 publishing { // new maven
