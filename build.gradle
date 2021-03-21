@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 group = 'com.ceyoniq.nscale.tooling'
-version = "1.0.1"
+version = "1.0.2"
 
 sourceSets {
    java9 {
