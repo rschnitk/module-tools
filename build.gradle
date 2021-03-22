@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 group = 'com.ceyoniq.nscale.tooling'
-version = "1.0.2"
+version = "1.0.3"
 
 sourceSets {
    java9 {
@@ -48,6 +48,12 @@ jar {
     into('') {
         from sourceSets.java9.output
     }
+
+    manifest.attributes["Created-By"] = "${System.getProperty("java.version")} (${System.getProperty("java.vendor")})"
+    manifest.attributes["Implementation-Title"] = project.name
+    manifest.attributes["Implementation-Version"] = project.version
+    manifest.attributes["Implementation-Vendor"] = 'Ceyoniq.com'
+    manifest.attributes["Automatic-Module-Name"] = 'nscale.module.tools'
 }
 
 sourcesJar {
