@@ -27,7 +27,7 @@ public interface ModuleOptions {
             return ( ModuleOptions ) cls.getConstructor().newInstance();
             
         } catch ( ReflectiveOperationException e ) {
-            throw new RuntimeException ( e.getMessage() );
+            throw new RuntimeException ( "Reflection error", e );
 
         } catch ( UnsupportedClassVersionError e ) {
             return new ModuleOptions() {

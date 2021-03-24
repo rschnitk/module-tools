@@ -9,6 +9,8 @@ import sun.misc.Unsafe;
 
 public class ModuleOptionsImpl implements ModuleOptions {
 
+    private static boolean DEBUG = "1".equals( System.getenv( "MODULE_TOOLS_DEBUG" ) );
+    
     private Method methodAddOpens;
 
     public ModuleOptionsImpl() {
@@ -33,7 +35,10 @@ public class ModuleOptionsImpl implements ModuleOptions {
                 methodAddOpens.setAccessible( true );
             }
             
-        } catch ( ReflectiveOperationException | SecurityException ex ) {
+        } catch ( Exception ex ) {
+            if ( DEBUG ) { 
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -45,6 +50,9 @@ public class ModuleOptionsImpl implements ModuleOptions {
             try {
                 methodAddOpens.invoke( mod.get(), pn );
             } catch ( ReflectiveOperationException | IllegalArgumentException e ) {
+                if ( DEBUG ) { 
+                    e.printStackTrace();
+                }
             }
         }
     }
