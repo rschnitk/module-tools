@@ -65,7 +65,7 @@ tasks.withType(Javadoc) {
     options.addBooleanOption('html5', true);
 }
 
-ext.useArtifactory = true;
+ext.useArtifactory = project.hasProperty('username') && project.hasProperty('password')
 
 publishing { // new maven
     repositories {
@@ -74,8 +74,8 @@ publishing { // new maven
 	            allowInsecureProtocol = true
 	            url  "http://artifactory1/artifactory/libs-release-local/"
 		        credentials {
-		            username = 'deployer'
-		            password = 'deployer'
+		            username = project.getProperty('username')
+		            password = project.getProperty('password')
 		        }
 	        }
         } else {        
