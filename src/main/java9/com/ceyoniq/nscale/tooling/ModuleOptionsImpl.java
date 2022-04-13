@@ -12,7 +12,8 @@ public class ModuleOptionsImpl implements ModuleOptions {
     private static boolean DEBUG = "1".equals( System.getenv( "MODULE_TOOLS_DEBUG" ) );
     
     private Method methodAddOpens;
-
+    private boolean accessible;
+    
     public ModuleOptionsImpl() {
         try {
             // this method is called by command line: java --add-opens
@@ -24,15 +25,17 @@ public class ModuleOptionsImpl implements ModuleOptions {
 
                 // Use unsafe
                 Field f = Unsafe.class.getDeclaredField( "theUnsafe" );
-                f.setAccessible( true );
+                f.trySetAccessible();
                 Unsafe unsafe = ( Unsafe ) f.get( null );
                 
                 // set accessible = true
                 unsafe.putBoolean( methodAddOpens, unsafe.objectFieldOffset( override ), true );
                 
+                this.accessible = true;
+                
             } catch ( NoSuchFieldException ex ) {
                 // Java 16: minimum JVM option is:   "--add-opens" "java.base/java.lang=ALL-UNNAMED"
-                methodAddOpens.setAccessible( true );
+                this.accessible = methodAddOpens.trySetAccessible();
             }
             
         } catch ( Exception ex ) {
@@ -42,6 +45,11 @@ public class ModuleOptionsImpl implements ModuleOptions {
         }
     }
 
+    @Override
+    public boolean isAccessible() {
+        return this.accessible;
+    }
+    
     @Override
     public void addOpens( String module, String pn ) {
 

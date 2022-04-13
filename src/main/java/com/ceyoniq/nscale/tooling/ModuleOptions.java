@@ -3,12 +3,19 @@ package com.ceyoniq.nscale.tooling;
 public interface ModuleOptions {
 
     /**
+     * Is add-opens accessible
+     * @return true if module options can use setAccessible
+     * @since 1.0.5
+     */
+    default boolean isAccessible() { return false; }
+    
+    /**
      * Open module for given package.
      * <p> This has the same meaning as the Java command line option '--add-opens=module/package=ALL-UNNAMED' </p> 
      * @param module name of module to open (e.g. "java.base")
      * @param pn package name (e.g. "java.lang")
      */
-    public void addOpens( String module, String pn );
+    default void addOpens( String module, String pn ) {}
     
     /**
      * Create ModuleOptions for Java &gt;= 9 or dummy implementation on Java 8. 
@@ -27,14 +34,10 @@ public interface ModuleOptions {
             return ( ModuleOptions ) cls.getConstructor().newInstance();
             
         } catch ( ReflectiveOperationException e ) {
-            throw new RuntimeException ( "Reflection error", e );
+            throw new IllegalArgumentException( "Reflection error", e );
 
         } catch ( UnsupportedClassVersionError e ) {
-            return new ModuleOptions() {
-                @Override
-                public void addOpens( String module, String pn ) {
-                }
-            };
+            return new ModuleOptions() {};
         }
     }
 }
