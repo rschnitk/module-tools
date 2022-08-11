@@ -5,38 +5,30 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import sun.misc.Unsafe;
+import sun.misc.Unsafe; //NOSONAR
 
 public class ModuleOptionsImpl implements ModuleOptions {
 
-    private static boolean DEBUG = "1".equals( System.getenv( "MODULE_TOOLS_DEBUG" ) );
+    private static final boolean DEBUG = "1".equals( System.getenv( "MODULE_TOOLS_DEBUG" ) );
     
     private Method methodAddOpens;
     private boolean accessible;
-    
+
     public ModuleOptionsImpl() {
         try {
             // this method is called by command line: java --add-opens
             methodAddOpens = Module.class.getDeclaredMethod( "implAddOpensToAllUnnamed", String.class );
             
-            try {
-                // For Java 9-15, try to use Unsafe to setAccessible() - no warnings on command line
-                Field override = AccessibleObject.class.getDeclaredField( "override" );
+            // Use unsafe
+            Field f = Unsafe.class.getDeclaredField( "theUnsafe" );
+            f.trySetAccessible();
+            Unsafe unsafe = ( Unsafe ) f.get( null );
 
-                // Use unsafe
-                Field f = Unsafe.class.getDeclaredField( "theUnsafe" );
-                f.trySetAccessible();
-                Unsafe unsafe = ( Unsafe ) f.get( null );
+            // set accessible = true
+            unsafe.putBoolean( methodAddOpens, accessibleObjectOffset( unsafe ), true );
+            
+            this.accessible = true;
                 
-                // set accessible = true
-                unsafe.putBoolean( methodAddOpens, unsafe.objectFieldOffset( override ), true );
-                
-                this.accessible = true;
-                
-            } catch ( NoSuchFieldException ex ) {
-                // Java 16: minimum JVM option is:   "--add-opens" "java.base/java.lang=ALL-UNNAMED"
-                this.accessible = methodAddOpens.trySetAccessible();
-            }
             
         } catch ( Exception ex ) {
             if ( DEBUG ) { 
@@ -62,6 +54,32 @@ public class ModuleOptionsImpl implements ModuleOptions {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+    
+    // ------------------------------------------------------------------------------------------------------------------
+
+    private static long accessibleObjectOffset( Unsafe unsafe ) throws IllegalArgumentException, ReflectiveOperationException {
+        
+        try {
+            Field override = AccessibleObject.class.getDeclaredField( "override" );
+            return unsafe.objectFieldOffset( override );
+        } catch ( NoSuchFieldException e ) {
+            return 12; // hard coded default
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    // simple test (main)
+    public static void main( String[] args ) {
+        ModuleOptionsImpl mopt = new ModuleOptionsImpl();
+        if ( mopt.isAccessible() ) {
+            mopt.addOpens( "java.base", "java.lang" );
+            mopt.addOpens( "java.base", "java.util" );
+            System.out.println( "Done." ); //NOSONAR
+        } else {
+            System.out.println( "Missing JVM Option: \"--add-opens\" \"java.base/java.lang=ALL-UNNAMED\"" ); //NOSONAR
         }
     }
 }
