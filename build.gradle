@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 group = 'com.ceyoniq.nscale.tooling'
-version = "1.0.6"
+version = "1.0.7"
 
 sourceSets {
    java9 {
@@ -66,13 +66,15 @@ tasks.withType(Javadoc) {
 }
 
 ext.useArtifactory = project.hasProperty('username') && project.hasProperty('password')
+ext.usedURL = project.hasProperty('repository') ? project.getProperty('repository')
+                                                : "http://artifactory1/artifactory/libs-release-local/"
 
 publishing { // new maven
     repositories {
         if ( useArtifactory ) {
 	        maven {
 	            allowInsecureProtocol = true
-	            url  "http://artifactory1/artifactory/libs-release-local/"
+	            url  usedURL
 		        credentials {
 		            username = project.getProperty('username')
 		            password = project.getProperty('password')
@@ -89,4 +91,37 @@ publishing { // new maven
             from components.java
         }
     }
+
+    generatePomFileForMavenJavaPublication {
+        destination = file( "$buildDir/libs/${project.name}-${project.version}.pom" )
+    }
+
+    generateMetadataFileForMavenJavaPublication {
+        outputFile = file( "$buildDir/libs/${project.name}-${project.version}.module" )
+    }
 }
+
+// task for artifacts/archives reference
+task generatePom( dependsOn: generatePomFileForMavenJavaPublication ) {
+    group = "Build"
+    description = "Build maven pom artefact."
+    ext.destFile = generatePomFileForMavenJavaPublication.destination
+}
+
+// task for artifacts/archives reference
+task generateModule( dependsOn: generateMetadataFileForMavenJavaPublication ) {
+    group = "Build"
+    description = "Build gradle module artefact."
+    ext.destFile = generateMetadataFileForMavenJavaPublication.outputFile
+}
+
+jar { // package url information
+    dependsOn generatePomFileForMavenJavaPublication
+    into("META-INF/maven/$project.group/$project.name") {
+        from { generatePomFileForMavenJavaPublication.destination }
+        rename ".*", "pom.xml"
+    }
+}
+
+assemble.dependsOn generatePom
+assemble.dependsOn generateModule
