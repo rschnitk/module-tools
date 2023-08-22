@@ -1,0 +1,24 @@
+stages:
+  - build
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.vfs.watch=false"
+  GRADLE_USER_HOME: _gradle_home
+  
+gradle build:
+    stage: build
+    image: eclipse-temurin:11-jdk
+    script:
+        - ./gradlew --warning-mode=all --build-cache build
+    artifacts:
+      when: on_success
+      expire_in: 1 days
+      paths:
+        - "**/build/libs/*.jar"
+    cache:
+        when: always
+        policy: pull-push
+        paths:
+          - _gradle_home/caches/
+          - _gradle_home/notifications/
+          - _gradle_home/wrapper/
