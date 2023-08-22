@@ -19,22 +19,18 @@ dependencies {
 }
 
 compileJava {
-   sourceCompatibility = JavaVersion.VERSION_1_8
-   targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 compileJava9Java {
-   sourceCompatibility = JavaVersion.VERSION_1_9
-   targetCompatibility = JavaVersion.VERSION_1_9
-}
-
-// this will configure the java compile tasks with the appropriate JDK
-project.afterEvaluate {
-    tasks.withType(JavaCompile) {
-    	def env = ( sourceCompatibility == JavaVersion.VERSION_1_8 ) ? "JAVA8_HOME" : "JAVA11_HOME";
-        def jdkHome = System.getenv( env )
-        options.fork = true
-        options.forkOptions.javaHome = file(jdkHome)
+    sourceCompatibility = JavaVersion.VERSION_1_9
+    targetCompatibility = JavaVersion.VERSION_1_9
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(11)
     }
 }
 
