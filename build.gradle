@@ -23,6 +23,7 @@ compileJava {
     targetCompatibility = JavaVersion.VERSION_1_8
     javaCompiler = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(8)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
 }
 
@@ -31,6 +32,7 @@ compileJava9Java {
     targetCompatibility = JavaVersion.VERSION_1_9
     javaCompiler = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(11)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
 }
 
