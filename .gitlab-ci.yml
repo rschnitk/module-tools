@@ -14,7 +14,7 @@ gradle build:
       when: on_success
       expire_in: 1 days
       paths:
-        - "**/build/libs/*.jar"
+        - "build/libs/*"
     cache:
         when: always
         policy: pull-push
