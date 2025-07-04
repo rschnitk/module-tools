@@ -58,21 +58,21 @@ sourcesJar {
 	from sourceSets.java9.java
 }
 
-tasks.withType(Javadoc) {
+tasks.withType(Javadoc).configureEach {
     options.addStringOption('Xdoclint:none', '-quiet')
-    options.addBooleanOption('html5', true);
+    options.addBooleanOption('html5', true)
 }
 
 ext.useArtifactory = project.hasProperty('username') && project.hasProperty('password')
 ext.usedURL = project.hasProperty('repository') ? project.getProperty('repository')
-                                                : "http://artifactory1/artifactory/libs-release-local/"
+                                                : "http://artifactory1.ct.com/artifactory/libs-release-local/"
 
 publishing { // new maven
     repositories {
         if ( useArtifactory ) {
 	        maven {
 	            allowInsecureProtocol = true
-	            url  usedURL
+	            url = usedURL
 		        credentials {
 		            username = project.getProperty('username')
 		            password = project.getProperty('password')
@@ -80,34 +80,37 @@ publishing { // new maven
 	        }
         } else {        
 	        maven {
-	            url "file:///${rootProject.projectDir}/upload"
+	            url = "file:///${rootProject.projectDir}/upload"
 	        }
         }
     }
     publications {
+        //noinspection GroovyAssignabilityCheck
         mavenJava( MavenPublication ) {
             from components.java
         }
     }
 
     generatePomFileForMavenJavaPublication {
-        destination = file( "$buildDir/libs/${project.name}-${project.version}.pom" )
+        destination = project.layout.buildDirectory.file("libs/${project.name}-${project.version}.pom").get()
     }
 
     generateMetadataFileForMavenJavaPublication {
-        outputFile = file( "$buildDir/libs/${project.name}-${project.version}.module" )
+        outputFile = project.layout.buildDirectory.file("libs/${project.name}-${project.version}.module").get()
     }
 }
 
 // task for artifacts/archives reference
-task generatePom( dependsOn: generatePomFileForMavenJavaPublication ) {
+tasks.register('generatePom') {
+    dependsOn generatePomFileForMavenJavaPublication
     group = "Build"
     description = "Build maven pom artefact."
     ext.destFile = generatePomFileForMavenJavaPublication.destination
 }
 
 // task for artifacts/archives reference
-task generateModule( dependsOn: generateMetadataFileForMavenJavaPublication ) {
+tasks.register('generateModule') {
+    dependsOn generateMetadataFileForMavenJavaPublication
     group = "Build"
     description = "Build gradle module artefact."
     ext.destFile = generateMetadataFileForMavenJavaPublication.outputFile
