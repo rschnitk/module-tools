@@ -2,6 +2,7 @@ package com.ceyoniq.nscale.tooling;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
@@ -29,10 +30,20 @@ public class ModuleOptionsImpl implements ModuleOptions {
             
             this.accessible = true;
                 
-            
+        } catch ( NoClassDefFoundError exc ) { // unsafe missing
+
+            if ( methodAddOpens != null ) {
+                try {
+                    methodAddOpens.setAccessible(true);
+                    this.accessible = true;
+                } catch ( InaccessibleObjectException e ) {
+                    // let accessible false
+                }
+            }
+
         } catch ( Exception ex ) {
             if ( DEBUG ) { 
-                ex.printStackTrace();
+                ex.printStackTrace(System.out);
             }
         }
     }
@@ -51,7 +62,7 @@ public class ModuleOptionsImpl implements ModuleOptions {
                 methodAddOpens.invoke( mod.get(), pn );
             } catch ( ReflectiveOperationException | IllegalArgumentException e ) {
                 if ( DEBUG ) { 
-                    e.printStackTrace();
+                    e.printStackTrace(System.out);
                 }
             }
         }
@@ -59,7 +70,7 @@ public class ModuleOptionsImpl implements ModuleOptions {
     
     // ------------------------------------------------------------------------------------------------------------------
 
-    private static long accessibleObjectOffset( Unsafe unsafe ) throws IllegalArgumentException, ReflectiveOperationException {
+    private static long accessibleObjectOffset( Unsafe unsafe ) throws IllegalArgumentException {
         
         try {
             Field override = AccessibleObject.class.getDeclaredField( "override" );
